@@ -9,6 +9,7 @@ use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
+use App\Events\ProductChanged;
 
 class ProductController extends Controller
 {
@@ -31,6 +32,7 @@ class ProductController extends Controller
 
         $product = Product::create($data);
         $product->tags()->sync($tagIds);
+        event(new ProductChanged($product, 'created'));
 
         return new ProductResource(
             $product->load(['category', 'tags'])
@@ -56,6 +58,7 @@ class ProductController extends Controller
         }
 
         $product->update($data);
+        event(new ProductChanged($product, 'updated'));
 
         return new ProductResource(
             $product->refresh()->load(['category', 'tags'])
