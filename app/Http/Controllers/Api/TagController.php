@@ -7,6 +7,7 @@ use App\Http\Requests\StoreTagRequest;
 use App\Http\Requests\UpdateTagRequest;
 use App\Http\Resources\TagResource;
 use App\Models\Tag;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 
@@ -19,22 +20,22 @@ class TagController extends Controller
         );
     }
 
-    public function store(StoreTagRequest $request): TagResource
+    public function store(StoreTagRequest $request): JsonResponse
     {
-        $tag = Tag::create($request->validated());
+        $tag = Tag::query()->create($request->validated());
 
-        return new TagResource($tag);
+        return (new TagResource($tag))
+            ->response()
+            ->setStatusCode(Response::HTTP_CREATED);
     }
 
     public function show(Tag $tag): TagResource
     {
-        return new TagResource($tag);
+        return new TagResource($tag->load('products'));
     }
 
-    public function update(
-        UpdateTagRequest $request,
-        Tag $tag
-    ): TagResource {
+    public function update(UpdateTagRequest $request, Tag $tag): TagResource
+    {
         $tag->update($request->validated());
 
         return new TagResource($tag->refresh());
