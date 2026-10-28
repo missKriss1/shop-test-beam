@@ -1,10 +1,18 @@
-
 import { createInertiaApp } from '@inertiajs/react';
+import { configureEcho } from '@laravel/echo-react';
+
 const echoKey = import.meta.env.VITE_REVERB_APP_KEY;
 const echoHost = import.meta.env.VITE_REVERB_HOST;
 
 if (echoKey && echoHost && echoHost !== '127.0.0.1' && echoHost !== 'localhost') {
     }
+
+configureEcho({
+    broadcaster: 'pusher',
+    key: import.meta.env.VITE_PUSHER_APP_KEY,
+    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
+    forceTLS: true,
+});
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 

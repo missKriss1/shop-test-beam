@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import { useEchoPublic } from '@laravel/echo-react';
 import { useCallback, useEffect, useState } from 'react';
 
 type Category = { id: number; name: string; slug: string };
@@ -100,8 +101,44 @@ export default function Demo() {
     const [editingId, setEditingId] = useState<number | null>(null);
     const [events, setEvents] = useState<SocketEvent[]>([]);
 
-    
-    
+    useEchoPublic<{
+        action: string;
+        product: { id: number; name: string; price: string | number; stock: number };
+        changed_at: string;
+    }>('products', '.product.changed', (event) => {
+        setEvents((previous) =>
+            [
+                {
+                    source: 'product' as const,
+                    action: event.action,
+                    title: event.product.name,
+                    detail: `Цена: ${event.product.price} · Остаток: ${event.product.stock}`,
+                    changed_at: event.changed_at,
+                },
+                ...previous,
+            ].slice(0, 12),
+        );
+    });
+
+    useEchoPublic<{
+        action: string;
+        user: { id: number; name: string; email: string };
+        changed_at: string;
+    }>('users', '.user.changed', (event) => {
+        setEvents((previous) =>
+            [
+                {
+                    source: 'user' as const,
+                    action: event.action,
+                    title: event.user.name,
+                    detail: event.user.email,
+                    changed_at: event.changed_at,
+                },
+                ...previous,
+            ].slice(0, 12),
+        );
+    });
+
     const emptyProduct = {
         category_id: '',
         name: '',
@@ -343,7 +380,7 @@ export default function Demo() {
                     <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
                             <h2 className="text-xl font-semibold">
-                                Активность
+                                События WebSocket
                             </h2>
                             <p className="mt-1 text-sm text-slate-500">
                                 Laravel Reverb, каналы products и users. Создайте
